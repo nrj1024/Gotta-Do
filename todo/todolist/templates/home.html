@@ -1,0 +1,157 @@
+{% load widget_tweaks %}
+{% load static %}
+
+<head>
+    <title>To-Do List.</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+</head>
+
+<style>
+    .grid-container {
+        position: relative;
+        top: 80px;
+        display: grid;
+        grid-template-columns: auto auto auto auto;
+        background-color: transparent;
+        padding: 20px;
+    }
+    .grid-item {
+        backdrop-filter: blur(25px);
+        border: none;
+        box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+        border-radius: 20px;
+        padding: 20px;
+        margin: 5px;
+        font-family: Product Sans;
+        font-size: 30px;
+        text-align: center;
+        color: white;
+    }
+    dialog{
+        font-family: Product Sans;
+        color: white;
+    }
+    dialog::backdrop{
+        background: rgba(0,0,0,0.3);
+    }
+    #lgout{
+        background-color: white;
+        color: black;
+        width: 100%;
+    }
+    #lgout:hover{
+        background-color: #d64978;
+        text-decoration: none;
+        color: white;
+    }
+</style>
+
+<body>
+<div style="background:url('{% static 'bg.jpg' %}') no-repeat; position: fixed; background-size: cover; width: 100%; height: 100%;">
+</div>
+
+<div id="lgpanel" style="display: none; z-index: 1; position: absolute; top: 75px; right: 25px; width: 115px; height: 50px; background-color: white; border-radius: 0px 0px 10px 10px;">
+    <ul style="list-style-type:none;">
+        <li id="lgout" onclick="location.replace('logout')" style="text-align: center; cursor: pointer; position: absolute; left: 0px; top: 10px;" >Log Out</li>
+    </ul>
+</div>
+
+<div style="z-index: 2; position: fixed; top: 0px; left: 0px; height: 75px; width: 100%; backdrop-filter: blur(25px); box-shadow: 0px 0px 10px rgba(0,0,0,0.7);">
+    <div style="color: white; font-size: 225%; font-family: Product Sans; font-weight: 600; position: fixed; top: 10px; left: 30px;">
+        To-Do List.
+    </div>
+    <div onclick="lgpanel()" style="cursor: pointer;"> 
+        <div style="color: white; font-size: 100%; font-family: Product Sans; font-weight: 400; position: fixed; top: 27px; right: 95px;">
+            {{username}}
+        </div>
+        <div style="background-color: transparent; background:url('{% static 'user.png' %}') no-repeat; background-size: cover; border-color: white; border-radius: 100px; width: 50px; height: 50px; position: fixed; top: 13px; right: 25px;">
+        </div>
+    </div>
+    
+</div>
+<button type="submit" name='new_list' onclick="createlist()" style="color: white; position: fixed; right: 20px; bottom: 20px; width: 60px; height: 60px; border-radius: 30px; background-color: #c23649; border: none; box-shadow: 0px 0px 10px rgba(0,0,0,0.7);">
+    <h1>+</h1>
+</button>
+<dialog id="createdialog" style="position: fixed; top: 40%; border: none; border-radius: 25px; background-color: transparent; backdrop-filter: blur(25px); box-shadow: 0px 0px 10px rgba(0,0,0,0.7);">
+    <form style="padding-top: 12px;" action="home" method="POST">
+        {% csrf_token %}
+        <input name="listname" style="padding: 5px; position: relative; top: 2px;" type="text" placeholder="List name">
+        <button class="btn btn-light" name="addList" type="submit">Create</button>
+        <button class="btn btn-light" onclick="close1()">Cancel</button>
+    </form>
+</dialog>
+
+{% for task,list in tasksNlists %}
+<dialog id="tasksof{{ list.id }}" style="position: fixed; border: none; border-radius: 25px; background-color: transparent; backdrop-filter: blur(25px); box-shadow: 0px 0px 10px rgba(0,0,0,0.7);">
+    <form style="padding-top: 12px;" action="home" method="POST">
+        {% csrf_token %}
+        {% for t in task %}
+            {% if t.completed %}
+                <input type="checkbox" checked name="cstat{{t.id}}" id="task{{t.id}}" onchange="strikeit({{t.id}})" style="outline: none; position: relative; top: 2px;">&nbsp&nbsp&nbsp<label id="label{{t.id}}" style="text-decoration: line-through;">{{t.name}}</label>
+                <br>
+            {% else %}
+                <input type="checkbox" name="cstat{{t.id}}" id="task{{t.id}}" onchange="strikeit({{t.id}})" style="outline: none; position: relative; top: 2px;">&nbsp&nbsp&nbsp<label id="label{{t.id}}">{{t.name}}</label>
+                <br>
+            {% endif %}
+        {% endfor %}
+        <input name="taskname" style="padding: 5px; position: relative; top: 2px;" type="text" placeholder="Task..">
+        <input type="hidden" name="listid" value="{{ list.id }}">
+        <button class="btn btn-light" name="addTask" type="submit">Create</button>
+        <button class="btn btn-light" name="close" type="submit" onclick="close2()">Close</button>
+    </form>
+</dialog>
+{% endfor %}
+
+<div class="grid-container">
+{% for list in lists %}
+    <div class="grid-item" id="{{ list.id }}" onclick="showTasks({{ list.id }})" onmouseenter="hoverstyle({{ list.id }})" onmouseout="normalstyle({{ list.id }})" style="cursor: pointer;">
+    {{ list.name }}
+    </div>
+{% endfor %}
+</div>
+</body>
+
+<script>
+	function createlist(){
+    	document.getElementById("createdialog").showModal();
+    }
+    function close1(){
+    	document.getElementById("createdialog").close();
+    }
+    function close2(){
+    	document.getElementById("tasks").close();
+    }
+    function hoverstyle(listid){
+        document.getElementById(listid).style.backgroundColor="rgba(255,255,255,0.2)";
+    }
+    function normalstyle(listid){
+        document.getElementById(listid).style.backgroundColor='transparent';
+    }
+    function showTasks(listid){
+        //var url="task_view/any".replace('any', listid);
+        //location.href=url;
+        document.getElementById("tasksof"+listid).showModal();
+
+    }
+    function strikeit(taskid){
+        var label=document.getElementById('label'+taskid);
+        var checked=document.getElementById('task'+taskid).checked;
+        if(checked==true){
+            label.style.setProperty("text-decoration", "line-through");
+        }
+        else{
+            label.style.setProperty("text-decoration", "none");
+        }
+    }
+
+    function lgpanel(){
+        var panel=document.getElementById('lgpanel');
+        if(panel.style.display=='none'){
+            panel.style.display='block';
+        }
+        else{
+            panel.style.display='none';
+        }
+    }
+</script>

@@ -1,0 +1,30 @@
+{% load widget_tweaks %}
+{% load static %}
+
+<head>
+    <title>To-Do List.</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+</head>
+
+<body>
+<div style="background:url('{% static 'bg.jpg' %}') no-repeat; font-family: Product Sans; position: fixed; background-size: cover; width: 100%; height: 100%;"> <!--This position:fixed; is what making your webpage unscrollable. Never put the content you wish to be scrollable under a fixed parent. -->
+</div>  
+
+<div style="color: white; font-size: 625%; font-family: Product Sans; font-weight: 700; position: absolute; right: 10%; top: 38%;">
+    To-Do List.
+</div>
+    
+<div style="position: absolute; overflow: auto; top:0; left: 0; display: table; width: 40%; height: 100%; padding: 20px; box-shadow: 0px 0px 10px rgba(0,0,0,0.7); backdrop-filter: blur(25px); color:white;">
+    <div style="display: table-cell; vertical-align: middle; padding-bottom: 55px;">
+        <h10><br></h10>
+        <h2>Hey there !</h2>
+        <p>Login to your account or register to create a new one :)</p>
+        <br>
+        <button class="btn btn-primary" onclick="location.href='login'" style="width: 100%;">Log In</button>
+        <br><br>
+        <button class="btn btn-primary" onclick="location.href='register'" style="width: 100%;">Register</button>
+    </div>
+</div>
+    
+</body>
